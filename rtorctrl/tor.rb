@@ -4,6 +4,9 @@
 # License::   GPLv3
 #
 require 'socket'
+require 'uri'
+require 'ipaddr'
+
 require './helpers.rb'
 require './symbols.rb'
 require './exceptions.rb'
@@ -41,9 +44,9 @@ module Tor
 			err = check_recv
 			case err
 			when :OK_END_REPLY then
-				result = @s.gets
+				result = @s.gets[0..-3]
 			when :OK_MID_REPLY then
-				result = @s.gets
+				result = @s.gets[0..-3]
 				@s.gets
 			when :OK_DATA_REPLY then
 				loop do
@@ -157,7 +160,14 @@ module Tor
 
 		def setconf hash
 			hash.each do |x|
-				self.send "SETCONF #{x.first.to_s}=\"#{x.last.to_s}\""
+				case x.class
+				when TrueClass then
+					self.send "SETCONF #{x.first.to_s}=\"1\""
+				when FalseClass then
+					self.send "SETCONF #{x.first.to_s}=\"0\""
+				else
+					self.send "SETCONF #{x.first.to_s}=\"#{x.last.to_s}\""
+				end
 			end
 		end
 
@@ -167,10 +177,48 @@ module Tor
 			end
 		end
 
-		def getconf key
-			result = self.send "GETCONF #{key.to_s}"
-			result =~ /(.+)=(.+)/
-				$2
+		def getconf
+			result_hash = Hash.new
+			Conf::KeyToDataType.each do |x|
+				result = self.send "GETCONF #{x.first.to_s}"
+				result =~ /(.+)=(.+)/
+				if not $2.nil?
+					case x.last
+					when :Boolean then
+						result_hash[x.first] = false if ($2=="0")
+						result_hash[x.first] = true if ($2 =="1")
+					when :DataSize then
+						result_hash[x.first] = $2.to_i
+					when :CommaList then
+						result_hash[x.first] = $2.split ','
+					when :PortsCommaList then
+						portscommalist = []
+						$2.split(',').each do |port|
+							portscommalist << port.to_i
+						end
+						result_hash[x.first] = portscommalist
+					when :URICommaList then
+						uricommalist = []
+						$2.split(',').each do |uri|
+							uricommalist << URI.parse(uri)
+						end
+						result_hash[x.first] = uricommalist
+					when :IPLineList then
+						iplinelist = []
+						$2.split(' ').each do |ip|
+							iplinelist << IPAddr.new(ip) 
+						end
+						result_hash[x.first] = iplinelist
+					when :IPAddr then
+						result_hash[x.first] = IPAddr.new $2
+					when :Integer then
+						result_hash[x.first] = $2.to_i
+					else
+						result_hash[x.first] = $2
+					end
+				end
+			end
+			result_hash
 		end
 
 		def getconfs
