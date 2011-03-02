@@ -320,7 +320,7 @@ module Tor
 			:ServerDNSSearchDomains => :Boolean,
 			:ServerDNSTestAddresses => :URICommaList,
 			:ShutdownWaitLength => :Integer,
-			:SocksListenAddress => :IPLineList,
+			:SocksListenAddress => :IPPortLineList,
 			:SocksPolicy => :LineList,
 			:SocksPort => :Integer,
 			:SocksTimeout => :Integer,

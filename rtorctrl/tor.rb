@@ -203,10 +203,18 @@ module Tor
 							uricommalist << URI.parse(uri)
 						end
 						result_hash[x.first] = uricommalist
-					when :IPLineList then
+					when :IPPortLineList then
 						iplinelist = []
 						$2.split(' ').each do |ip|
-							iplinelist << IPAddr.new(ip) 
+						 if (ip.split(":").size == 1)
+							iplinelist << IPAddr.new(ip)
+						 end
+						 if (ip.split(":").size == 2)
+							iparray=[]
+							iparray << IPAddr.new(ip.split(":")[0])
+							iparray << ip.split(":")[1].to_i
+							iplinelist << iparray
+						 end
 						end
 						result_hash[x.first] = iplinelist
 					when :IPAddr then
