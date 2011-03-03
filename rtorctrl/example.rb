@@ -12,7 +12,12 @@ t.auth "torika"
 
 h = Hash.new
 h[Tor::Conf::Keys::SocksPort] = "9050"
-puts t.getconf
+s = t.getconf
+s.each do |x|
+	puts "#{x[0].to_s} -> #{x[1].to_s}"
+end
+
+t.setconf s
 
 =begin
 t.getconfs.each_line do |x|

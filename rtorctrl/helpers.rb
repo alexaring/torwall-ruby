@@ -1,11 +1,34 @@
 #!/usr/bin/env ruby
 #
 
+require 'ipaddr'
+
 module Tor
 
 	module DataTypes
+		class IP
+
+			attr_accessor :ip
+			attr_accessor :port
+
+			def initialize ip, port=nil
+				@ip = IPAddr.new ip
+			    @port = port.to_i if not port.nil?
+				@maskstr = "/"+ip.split("/")[1].to_s if not ip.split("/")[1].nil?
+			end
+
+			def to_s
+				if not @port.nil?
+					"#{@ip.to_s}#{@maskstr.to_s}:#{@port.to_s}"
+				else
+					"#{@ip.to_s}#{@maskstr.to_s}"
+				end
+			end
+
+		end
+
 		# This class is a TorVersion Datatype, you can compare it with other TorVersions
-		class TorVersion
+		class Version
 
 			include Comparable
 
