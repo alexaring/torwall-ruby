@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby1.8
-#
+# Examble programm...
 #
 
 require 'gtk2'

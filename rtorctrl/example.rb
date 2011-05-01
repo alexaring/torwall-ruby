@@ -17,7 +17,7 @@ s.each do |x|
 	puts "#{x[0].to_s} -> #{x[1].to_s}"
 end
 
-t.setconf s
+#t.setconf s
 
 =begin
 t.getconfs.each_line do |x|
